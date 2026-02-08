@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Next Day Predictor</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+ margin:0;
+ height:100vh;
+ background:radial-gradient(circle at top,#0a0a2a,#02020c 70%);
+ overflow:hidden;
+ font-family:Segoe UI,sans-serif;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ color:#fff;
+}
+
+/* subtle cinematic warp */
+body.warp{
+ animation:warp 0.6s ease-in-out;
+}
+@keyframes warp{
+ 0%{transform:scale(1)}
+ 50%{transform:scale(1.06)}
+ 100%{transform:scale(1)}
+}
+
+/* camera shake */
+.shake{
+ animation:shake 0.35s ease;
+}
+@keyframes shake{
+ 0%{transform:translate(0,0)}
+ 25%{transform:translate(2px,-1px)}
+ 50%{transform:translate(-2px,1px)}
+ 75%{transform:translate(1px,2px)}
+ 100%{transform:translate(0,0)}
+}
+
+/* 🧊 liquid glass card */
+.card{
+ width:400px;
+ padding:26px;
+ border-radius:24px;
+ background:linear-gradient(
+ 120deg,
+ rgba(255,255,255,.18),
+ rgba(255,255,255,.05),
+ rgba(255,255,255,.18)
+ );
+ backdrop-filter:blur(20px);
+ box-shadow:
+ 0 0 30px rgba(0,255,255,.35),
+ inset 0 0 40px rgba(255,255,255,.08);
+ text-align:center;
+ position:relative;
+ overflow:hidden;
+ transform:translateY(-480px);
+ animation:dropFast .8s cubic-bezier(.2,.9,.3,1) forwards;
+}
+
+/* glass highlight */
+.card::before{
+ content:"";
+ position:absolute;
+ inset:-50%;
+ background:linear-gradient(
+ 120deg,
+ transparent 40%,
+ rgba(255,255,255,.25),
+ transparent 60%
+ );
+ animation:glassMove 6s linear infinite;
+}
+
+@keyframes glassMove{
+ from{transform:translateX(-100%)}
+ to{transform:translateX(100%)}
+}
+
+@keyframes dropFast{
+ to{transform:translateY(0)}
+}
+
+h1{
+ color:#00fff7;
+ text-shadow:0 0 8px #00fff7;
+}
+
+select,button{
+ width:100%;
+ padding:12px;
+ margin-top:12px;
+ border:none;
+ border-radius:12px;
+ font-size:16px;
+}
+
+select{
+ background:rgba(0,0,0,.45);
+ color:#00fff7;
+}
+
+button{
+ background:linear-gradient(135deg,#00fff7,#00ff88);
+ font-weight:bold;
+ cursor:pointer;
+ box-shadow:0 0 12px #00fff7;
+}
+
+.output{
+ margin-top:18px;
+ height:42px;
+ font-size:15px;
+ text-shadow:0 0 4px rgba(0,255,255,.4);
+}
+
+.cursor{
+ display:inline-block;
+ width:6px;
+ background:#00fff7;
+ animation:blink 1s infinite;
+}
+@keyframes blink{50%{opacity:0}}
+
+.final{
+ margin-top:18px;
+ font-size:22px;
+ color:#00ff88;
+ text-shadow:0 0 12px #00ff88;
+ opacity:0;
+ animation:show 1s ease forwards;
+}
+@keyframes show{
+ to{opacity:1;transform:translateY(0)}
+}
+
+/* sprinkles */
+.sprinkle{
+ position:absolute;
+ top:-10px;
+ width:7px;height:7px;
+ border-radius:50%;
+ animation:fall 1.6s linear forwards;
+}
+@keyframes fall{
+ to{transform:translateY(320px) rotate(360deg);opacity:0}
+}
+
+/* PWA install */
+#installBtn{
+ display:none;
+ margin-top:12px;
+ background:#111;
+ color:#00fff7;
+}
+</style>
+</head>
+<body>
+
+<div class="card" id="card">
+ <h1>Next Day Predictor</h1>
+
+ <select id="day">
+  <option value="">Select a day</option>
+  <option>Monday</option><option>Tuesday</option>
+  <option>Wednesday</option><option>Thursday</option>
+  <option>Friday</option><option>Saturday</option>
+  <option>Sunday</option>
+ </select>
+
+ <button onclick="start()">Predict Day</button>
+ <button id="installBtn">📱 Install App</button>
+
+ <div class="output" id="out"></div>
+ <div id="final"></div>
+</div>
+
+<script>
+const steps=[
+ "🛰️ Contacting NASA...",
+ "🌌 Contacting Multiverses...",
+ "👽 Contacting Aliens...",
+ "📜 Searching in History...",
+ "📅 Contacting Google Calendar...",
+ "🚀 Contacting ISRO...",
+ "🧑‍🚀 Contacting Humans on Mars..."
+];
+
+const days=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+const out=document.getElementById("out");
+const card=document.getElementById("card");
+
+function start(){
+ const d=document.getElementById("day").value;
+ out.innerHTML=""; final.innerHTML="";
+ if(!d){out.textContent="❌ Select a day first";return;}
+ run(0,d);
+}
+
+function run(i,day){
+ if(i>=steps.length){finish(day);return;}
+ out.innerHTML="";
+ const span=document.createElement("span");
+ const cur=document.createElement("span");
+ cur.className="cursor";cur.innerHTML="&nbsp;";
+ out.append(span,cur);
+
+ let t=0;
+ const type=setInterval(()=>{
+   span.textContent+=steps[i][t++];
+   if(t===steps[i].length){
+     clearInterval(type);
+     setTimeout(()=>erase(),2000);
+   }
+ },60);
+
+ function erase(){
+   const e=setInterval(()=>{
+     span.textContent=span.textContent.slice(0,-1);
+     if(!span.textContent){
+       clearInterval(e);
+       cur.remove();
+       run(i+1,day);
+     }
+   },40);
+ }
+}
+
+function finish(day){
+ document.body.classList.add("warp");
+ card.classList.add("shake");
+
+ for(let i=0;i<36;i++){
+  const s=document.createElement("div");
+  s.className="sprinkle";
+  s.style.left=Math.random()*100+"%";
+  s.style.background=`hsl(${Math.random()*360},100%,60%)`;
+  card.appendChild(s);
+  setTimeout(()=>s.remove(),1600);
+ }
+
+ const next=days[(days.indexOf(day)+1)%7];
+ final.innerHTML=`<div class="final">✨ Next Day is ${next} ✨</div>`;
+
+ setTimeout(()=>{
+  document.body.classList.remove("warp");
+  card.classList.remove("shake");
+ },600);
+}
+
+/* 📱 PWA install */
+let deferredPrompt;
+window.addEventListener("beforeinstallprompt",e=>{
+ e.preventDefault();
+ deferredPrompt=e;
+ installBtn.style.display="block";
+});
+installBtn.onclick=()=>{
+ deferredPrompt.prompt();
+ deferredPrompt=null;
+ installBtn.style.display="none";
+};
+</script>
+
+</body>
+</html>
